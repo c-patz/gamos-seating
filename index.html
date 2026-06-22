@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>NOTO CLASSIC - Λίστα Καλεσμένων &amp; Κάτοψη</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#faf7f2; --panel:#fff; --ink:#2b2b2b; --muted:#8a8378;
+    --accent:#b08968; --accent-dark:#7f5539; --line:#e6ddd2;
+    --table:#cfe8e4; --table-line:#5f9ea0; --bride:#5bc0de; --warn:#e0734b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--ink);}
+  header{padding:18px 24px;background:var(--accent-dark);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+  header h1{margin:0;font-size:20px;font-weight:600;letter-spacing:.5px;}
+  nav{display:flex;gap:8px;}
+  nav button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;}
+  nav button.active{background:#fff;color:var(--accent-dark);font-weight:600;}
+  main{padding:20px;max-width:1100px;margin:0 auto;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;}
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:12px;color:var(--muted);}
+  input,select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:14px;min-width:90px;}
+  input#fSurname,input#fName{min-width:150px;}
+  button.primary{background:var(--accent);color:#fff;border:none;padding:9px 16px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;}
+  button.primary:hover{background:var(--accent-dark);}
+  button.secondary{background:#fff;border:1px solid var(--line);padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;border-bottom:2px solid var(--line);padding:8px 6px;}
+  td{padding:7px 6px;border-bottom:1px solid var(--line);}
+  tr:hover td{background:#fbf8f4;}
+  .pill{display:inline-block;background:var(--table);border:1px solid var(--table-line);border-radius:20px;padding:2px 10px;font-weight:600;font-size:13px;}
+  .actions button{background:none;border:none;cursor:pointer;font-size:15px;padding:2px 6px;}
+  .summary{display:flex;gap:16px;margin:14px 0;flex-wrap:wrap;}
+  .stat{background:#f4efe7;border-radius:10px;padding:10px 16px;font-size:13px;}
+  .stat b{font-size:18px;display:block;color:var(--accent-dark);}
+  .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;}
+  svg{width:100%;height:auto;display:block;}
+  .seat{fill:var(--table);stroke:var(--table-line);stroke-width:2;cursor:pointer;}
+  .seat:hover{fill:#b6d8d3;}
+  .seat.bride{fill:var(--bride);stroke:#2c8aa6;}
+  .seat.over{fill:#f3b59a;stroke:var(--warn);}
+  .seat.empty{fill:#f0ede7;stroke:#cfc7ba;}
+  .seatnum{font-size:13px;font-weight:700;fill:#234;text-anchor:middle;pointer-events:none;}
+  .seattotal{font-size:11px;font-weight:600;fill:#555;text-anchor:middle;pointer-events:none;}
+  .label{font-size:14px;fill:#555;text-anchor:middle;}
+  .legend{display:flex;gap:18px;margin-top:14px;font-size:12px;color:var(--muted);flex-wrap:wrap;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:14px;height:14px;border-radius:50%;display:inline-block;border:2px solid;}
+  dialog{border:none;border-radius:14px;padding:0;}
+  dialog .box{padding:20px;min-width:260px;}
+  dialog h3{margin-top:0;}
+  .hidden{display:none;}
+  #toast{position:fixed;bottom:20px;right:20px;background:#2b2b2b;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .3s;}
+  #toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💍 NOTO CLASSIC — Οργάνωση Γάμου</h1>
+  <nav>
+    <button id="tabListBtn" class="active">Λίστα Καλεσμένων</button>
+    <button id="tabPlanBtn">Κάτοψη</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============ LIST VIEW ============ -->
+<section id="viewList" class="panel">
+  <div class="toolbar">
+    <div class="field"><label>Επώνυμο</label><input id="fSurname" placeholder="π.χ. ΑΔΑΜΙΔΗΣ"></div>
+    <div class="field"><label>Όνομα</label><input id="fName" placeholder="π.χ. ΓΙΩΡΓΟΣ"></div>
+    <div class="field"><label>Άτομα</label><input id="fPeople" type="number" min="0" value="1" style="width:70px"></div>
+    <div class="field"><label>+ Καρότσι;</label><input id="fStroller" type="number" min="0" value="0" style="width:60px"></div>
+    <div class="field"><label>Τραπέζι</label><input id="fTable" type="number" min="1" style="width:70px"></div>
+    <button class="primary" id="addBtn">+ Προσθήκη</button>
+    <button class="secondary" id="exportBtn">⬇ Λήψη Excel</button>
+  </div>
+
+  <div class="summary" id="summaryBar"></div>
+
+  <table>
+    <thead><tr>
+      <th>Ονοματεπώνυμο</th><th>Άτομα</th><th>Τραπέζι</th><th></th>
+    </tr></thead>
+    <tbody id="guestRows"></tbody>
+  </table>
+
+  <p class="note">
+    * Η αρίθμηση τραπεζιών ξεκινά από το <b>1 = Νυφικό τραπέζι</b> (μέγιστο 10 άτομα: ζευγάρι, γονείς, κουμπάροι).
+    Για παιδιά γράψτε το σύνολο ατόμων (π.χ. 2 ενήλικες + 1 παιδί = 3). Για μωρό σε καρότσι χρησιμοποιήστε το πεδίο «+ Καρότσι» (εμφανίζεται ως 2+1κ).
+    Οι ροτόντες χωρούν 10, 11 ή 12 άτομα.
+  </p>
+</section>
+
+<!-- ============ FLOOR PLAN VIEW ============ -->
+<section id="viewPlan" class="panel hidden">
+  <p class="note" style="margin-top:0">
+    Πατήστε σε ένα τραπέζι για να του δώσετε αριθμό. Ο αριθμός εμφανίζεται μέσα στον κύκλο και το σύνολο ατόμων (από τη λίστα καλεσμένων) ακριβώς από πάνω. Κόκκινο χρώμα = υπερβαίνει τα 12 άτομα.
+  </p>
+  <div id="planSvgWrap"></div>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--bride);border-color:#2c8aa6"></i> Νυφικό τραπέζι (Νο 1)</span>
+    <span><i class="dot" style="background:var(--table);border-color:var(--table-line)"></i> Ανατεθειμένο τραπέζι</span>
+    <span><i class="dot" style="background:#f0ede7;border-color:#cfc7ba"></i> Χωρίς αριθμό</span>
+    <span><i class="dot" style="background:#f3b59a;border-color:var(--warn)"></i> Υπερβολή ατόμων (&gt;12)</span>
+  </div>
+</section>
+
+</main>
+
+<dialog id="numDialog">
+  <div class="box">
+    <h3 id="dialogTitle">Αριθμός τραπεζιού</h3>
+    <input id="dialogInput" type="number" min="1" style="width:100%;font-size:18px;padding:10px;">
+    <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="secondary" id="dialogClear">Καθαρισμός</button>
+      <button class="secondary" id="dialogCancel">Άκυρο</button>
+      <button class="primary" id="dialogOk">OK</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'guests';
+const PLAN_KEY = 'tableAssignments'; // svgSeatId -> tableNumber
+let guests = [];
+let assignments = {}; // seatId -> tableNumber (string)
+let currentSeatId = null;
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+// ---------- storage (shared across this couple's devices) ----------
+async function loadAll(){
+  try{
+    const g = await window.storage.get(STORAGE_KEY, true);
+    guests = g ? JSON.parse(g.value) : [];
+  }catch(e){ guests = []; }
+  try{
+    const p = await window.storage.get(PLAN_KEY, true);
+    assignments = p ? JSON.parse(p.value) : {};
+  }catch(e){ assignments = {}; }
+}
+async function saveGuests(){
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(guests), true); }
+  catch(e){ console.error('save error', e); toast('Σφάλμα αποθήκευσης'); }
+}
+async function saveAssignments(){
+  try{ await window.storage.set(PLAN_KEY, JSON.stringify(assignments), true); }
+  catch(e){ console.error('save error', e); toast('Σφάλμα αποθήκευσης'); }
+}
+
+// ---------- guest list logic ----------
+function greekCollate(a,b){
+  return a.localeCompare(b,'el');
+}
+function sortedGuests(){
+  return [...guests].sort((a,b)=> greekCollate(a.surname+a.name, b.surname+b.name));
+}
+function peopleLabel(g){
+  if(g.stroller && g.stroller>0) return `${g.people}+${g.stroller}κ`;
+  return String(g.people);
+}
+function peopleTotal(g){
+  return (g.people||0) + (g.stroller||0);
+}
+
+function renderGuestRows(){
+  const tbody = document.getElementById('guestRows');
+  tbody.innerHTML='';
+  sortedGuests().forEach(g=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${g.surname} ${g.name}</td>
+      <td><span class="pill">${peopleLabel(g)}</span></td>
+      <td>${g.table ? g.table : '—'}</td>
+      <td class="actions">
+        <button title="Διαγραφή" data-id="${g.id}" class="delBtn">🗑️</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  document.querySelectorAll('.delBtn').forEach(b=>{
+    b.onclick = async ()=>{
+      guests = guests.filter(g=>g.id !== b.dataset.id);
+      await saveGuests();
+      renderAll();
+    };
+  });
+}
+
+function renderSummary(){
+  const totalGuests = guests.reduce((s,g)=>s+peopleTotal(g),0);
+  const totalAdults = guests.reduce((s,g)=>s+(g.people||0),0);
+  const totalStrollers = guests.reduce((s,g)=>s+(g.stroller||0),0);
+  const tablesUsed = new Set(guests.filter(g=>g.table).map(g=>g.table)).size;
+  document.getElementById('summaryBar').innerHTML = `
+    <div class="stat"><b>${guests.length}</b>Εγγραφές</div>
+    <div class="stat"><b>${totalGuests}</b>Σύνολο ατόμων (+καρότσια)</div>
+    <div class="stat"><b>${totalAdults}</b>Σύνολο ατόμων</div>
+    <div class="stat"><b>${totalStrollers}</b>Καρότσια</div>
+    <div class="stat"><b>${tablesUsed}</b>Τραπέζια σε χρήση</div>
+  `;
+}
+
+function tableTotal(tableNum){
+  return guests.filter(g=>String(g.table)===String(tableNum))
+               .reduce((s,g)=>s+peopleTotal(g),0);
+}
+
+async function addGuest(){
+  const surname = document.getElementById('fSurname').value.trim().toUpperCase();
+  const name = document.getElementById('fName').value.trim().toUpperCase();
+  const people = parseInt(document.getElementById('fPeople').value)||0;
+  const stroller = parseInt(document.getElementById('fStroller').value)||0;
+  const table = document.getElementById('fTable').value.trim();
+  if(!surname || !name){ toast('Συμπληρώστε επώνυμο και όνομα'); return; }
+  guests.push({ id: Date.now()+'_'+Math.random().toString(36).slice(2),
+                surname, name, people, stroller, table: table || '' });
+  await saveGuests();
+  document.getElementById('fSurname').value='';
+  document.getElementById('fName').value='';
+  document.getElementById('fPeople').value='1';
+  document.getElementById('fStroller').value='0';
+  document.getElementById('fTable').value='';
+  renderAll();
+  toast('Προστέθηκε');
+}
+
+function exportExcel(){
+  const rows = sortedGuests().map(g=>({
+    'Ονοματεπώνυμο': `${g.surname} ${g.name}`,
+    'Άτομα': peopleLabel(g),
+    'Τραπέζι': g.table || ''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:30},{wch:10},{wch:10}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Καλεσμένοι');
+  XLSX.writeFile(wb, 'Lista_Kalesmenon.xlsx');
+}
+
+// ---------- floor plan ----------
+// Seat layout approximating the NOTO CLASSIC venue plan.
+// Each seat: {id, x, y, bride?:bool}
+function buildSeatLayout(){
+  const seats = [];
+  let id=0;
+  const add=(x,y,bride=false)=>{ seats.push({id:'s'+(id++), x, y, bride}); };
+
+  // Bridal table row (top middle) - represented as a few seats, table number fixed conceptually to 1
+  [430,470,510, 690,730,770].forEach((x,i)=> add(x, 95, true));
+
+  // Top-left small cluster
+  [195,235,275].forEach(x=> add(x, 95));
+
+  // Left block (irregular cluster of circles)
+  const leftBlock = [
+    [55,140],[105,140],
+    [40,185],[95,185],[185,170],
+    [40,235],[95,235],[230,200],
+    [40,285],[95,285],[230,250],[275,225],
+    [40,335],[95,335],[230,300],[280,275],
+    [55,380],[105,380],[185,330],[230,350]
+  ];
+  leftBlock.forEach(([x,y])=>add(x,y));
+
+  // Right-of-bridal cluster
+  const rightBlock = [
+    [710,140],[750,140],
+    [700,185],[745,185],[800,165],
+    [700,235],[745,235],[800,215],
+    [700,285],[745,285],[800,265],
+    [710,330],[755,330],[800,310]
+  ];
+  rightBlock.forEach(([x,y])=>add(x,y));
+
+  // Far-right (near bar) clusters
+  const farRight = [
+    [870,120],[915,140],
+    [960,165],[1005,140],
+    [960,210],[1005,185],[1050,165],
+    [960,255],[1005,225],[1050,255],
+    [960,300],[1005,280],[1050,300],[890,275]
+  ];
+  farRight.forEach(([x,y])=>add(x,y));
+
+  return seats;
+}
+const SEATS = buildSeatLayout();
+
+function buildSvg(){
+  const W=1100,H=460;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  // structural labels
+  svg += `<rect x="10" y="55" width="190" height="30" fill="#cfe8e4" stroke="#5f9ea0"/>`;
+  svg += `<text x="105" y="75" class="label" style="font-weight:700">NOTO CLASSIC</text>`;
+  svg += `<text x="60" y="445" class="label">ΕΙΣΟΔΟΣ</text>`;
+  svg += `<text x="1040" y="420" class="label">W.C</text>`;
+  svg += `<rect x="380" y="412" width="230" height="26" fill="#f4efe7" stroke="#cfc7ba"/>`;
+  svg += `<text x="495" y="430" class="label">Καναπέδες / Ορχήστρα</text>`;
+  svg += `<rect x="610" y="412" width="55" height="26" fill="#f4efe7" stroke="#cfc7ba"/>`;
+  svg += `<text x="637" y="430" class="label">D.J</text>`;
+  svg += `<text x="940" y="220" class="label" style="font-weight:700">BAR</text>`;
+  svg += `<line x1="0" y1="400" x2="1100" y2="400" stroke="#ccc"/>`;
+
+  SEATS.forEach(seat=>{
+    const tableNum = assignments[seat.id] || '';
+    const total = tableNum ? tableTotal(tableNum) : 0;
+    let cls='seat empty';
+    if(seat.bride) cls='seat bride';
+    else if(tableNum && total>12) cls='seat over';
+    else if(tableNum) cls='seat';
+    svg += `<g data-seat="${seat.id}" class="seatGroup" style="cursor:pointer">
+      <circle cx="${seat.x}" cy="${seat.y}" r="20" class="${cls}"/>
+      <text x="${seat.x}" y="${seat.y+5}" class="seatnum">${seat.bride ? '1' : (tableNum||'')}</text>
+      ${ (tableNum||seat.bride) ? `<text x="${seat.x}" y="${seat.y-26}" class="seattotal">${seat.bride ? '' : total}</text>` : '' }
+    </g>`;
+  });
+
+  svg += `</svg>`;
+  return svg;
+}
+
+function renderPlan(){
+  document.getElementById('planSvgWrap').innerHTML = buildSvg();
+  document.querySelectorAll('.seatGroup').forEach(g=>{
+    g.onclick = ()=> openSeatDialog(g.dataset.seat);
+  });
+}
+
+function openSeatDialog(seatId){
+  const seat = SEATS.find(s=>s.id===seatId);
+  if(seat.bride){ toast('Το νυφικό τραπέζι είναι σταθερά το Νο 1'); return; }
+  currentSeatId = seatId;
+  document.getElementById('dialogInput').value = assignments[seatId] || '';
+  const dlg = document.getElementById('numDialog');
+  dlg.showModal();
+  document.getElementById('dialogInput').focus();
+}
+
+document.getElementById('dialogOk').onclick = async ()=>{
+  const val = document.getElementById('dialogInput').value.trim();
+  if(val) assignments[currentSeatId] = val;
+  else delete assignments[currentSeatId];
+  await saveAssignments();
+  document.getElementById('numDialog').close();
+  renderPlan();
+};
+document.getElementById('dialogClear').onclick = async ()=>{
+  delete assignments[currentSeatId];
+  await saveAssignments();
+  document.getElementById('numDialog').close();
+  renderPlan();
+};
+document.getElementById('dialogCancel').onclick = ()=> document.getElementById('numDialog').close();
+
+// ---------- tabs ----------
+document.getElementById('tabListBtn').onclick = ()=>{
+  document.getElementById('viewList').classList.remove('hidden');
+  document.getElementById('viewPlan').classList.add('hidden');
+  document.getElementById('tabListBtn').classList.add('active');
+  document.getElementById('tabPlanBtn').classList.remove('active');
+};
+document.getElementById('tabPlanBtn').onclick = ()=>{
+  document.getElementById('viewPlan').classList.remove('hidden');
+  document.getElementById('viewList').classList.add('hidden');
+  document.getElementById('tabPlanBtn').classList.add('active');
+  document.getElementById('tabListBtn').classList.remove('active');
+  renderPlan();
+};
+
+document.getElementById('addBtn').onclick = addGuest;
+document.getElementById('exportBtn').onclick = exportExcel;
+
+function renderAll(){
+  renderGuestRows();
+  renderSummary();
+}
+
+(async function init(){
+  await loadAll();
+  renderAll();
+})();
+</script>
+</body>
+</html>
