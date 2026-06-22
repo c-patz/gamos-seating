@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>NOTO CLASSIC - Λίστα Καλεσμένων &amp; Κάτοψη</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --bg:#faf7f2; --panel:#fff; --ink:#2b2b2b; --muted:#8a8378;
@@ -67,6 +69,11 @@
   </nav>
 </header>
 
+<div id="configBanner" style="background:#fff3cd;border-bottom:1px solid #e0c46c;padding:14px 24px;font-size:13px;display:none;">
+  <b>⚠ Ρύθμιση online βάσης δεδομένων:</b> δεν έχουν συμπληρωθεί τα Firebase κλειδιά στο αρχείο.
+  Η λίστα αποθηκεύεται προσωρινά μόνο σε αυτόν τον browser. Δείτε τις οδηγίες που σου έδωσε ο Claude.
+</div>
+
 <main>
 
 <!-- ============ LIST VIEW ============ -->
@@ -128,6 +135,37 @@
 <div id="toast"></div>
 
 <script>
+// ====================== FIREBASE CONFIG ======================
+// Βάλε εδώ τα κλειδιά του Firebase project σου (Project settings -> General -> Your apps -> SDK config)
+const firebaseConfig = {
+  apiKey: "AIzaSyAbURtjSLctoKR0ySIyC04ioMhfPMUw0hU",
+  authDomain: "gamos-2026.firebaseapp.com",
+  projectId: "gamos-2026",
+  storageBucket: "gamos-2026.firebasestorage.app",
+  messagingSenderId: "918826268539",
+  appId: "1:918826268539:web:cd17944dee4ad2e47e6fde"
+};
+// ===============================================================
+
+let db = null;
+let firebaseReady = false;
+try{
+  if(firebaseConfig.apiKey && firebaseConfig.apiKey.indexOf('PASTE_') !== 0){
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    firebaseReady = true;
+  } else {
+    document.getElementById('configBanner').style.display = 'block';
+  }
+}catch(e){
+  console.error('Firebase init failed', e);
+  document.getElementById('configBanner').style.display = 'block';
+}
+
+const DOC_REF = () => db.collection('wedding').doc('main');
+</script>
+
+<script>
 const STORAGE_KEY = 'guests';
 const PLAN_KEY = 'tableAssignments'; // svgSeatId -> tableNumber
 let guests = [];
@@ -140,24 +178,50 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'), 1800);
 }
 
-// ---------- storage (shared across this couple's devices) ----------
+// ---------- storage ----------
+// If Firebase is configured: shared online database, live-synced across devices.
+// If not configured: falls back to localStorage (this browser only).
 async function loadAll(){
-  try{
-    const g = await window.storage.get(STORAGE_KEY, true);
-    guests = g ? JSON.parse(g.value) : [];
-  }catch(e){ guests = []; }
-  try{
-    const p = await window.storage.get(PLAN_KEY, true);
-    assignments = p ? JSON.parse(p.value) : {};
-  }catch(e){ assignments = {}; }
+  if(firebaseReady){
+    try{
+      const snap = await DOC_REF().get();
+      const data = snap.exists ? snap.data() : {};
+      guests = data.guests ? JSON.parse(data.guests) : [];
+      assignments = data.assignments ? JSON.parse(data.assignments) : {};
+    }catch(e){ console.error(e); toast('Σφάλμα σύνδεσης με τη βάση'); guests=[]; assignments={}; }
+    // live sync: refresh UI automatically when data changes on another device
+    DOC_REF().onSnapshot(snap=>{
+      if(!snap.exists) return;
+      const data = snap.data();
+      guests = data.guests ? JSON.parse(data.guests) : [];
+      assignments = data.assignments ? JSON.parse(data.assignments) : {};
+      renderAll();
+      if(!document.getElementById('viewPlan').classList.contains('hidden')) renderPlan();
+    });
+  } else {
+    try{ const g = localStorage.getItem(STORAGE_KEY); guests = g ? JSON.parse(g) : []; }
+    catch(e){ guests = []; }
+    try{ const p = localStorage.getItem(PLAN_KEY); assignments = p ? JSON.parse(p) : {}; }
+    catch(e){ assignments = {}; }
+  }
 }
 async function saveGuests(){
-  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(guests), true); }
-  catch(e){ console.error('save error', e); toast('Σφάλμα αποθήκευσης'); }
+  if(firebaseReady){
+    try{ await DOC_REF().set({ guests: JSON.stringify(guests) }, {merge:true}); }
+    catch(e){ console.error(e); toast('Σφάλμα αποθήκευσης'); }
+  } else {
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(guests)); }
+    catch(e){ console.error(e); toast('Σφάλμα αποθήκευσης'); }
+  }
 }
 async function saveAssignments(){
-  try{ await window.storage.set(PLAN_KEY, JSON.stringify(assignments), true); }
-  catch(e){ console.error('save error', e); toast('Σφάλμα αποθήκευσης'); }
+  if(firebaseReady){
+    try{ await DOC_REF().set({ assignments: JSON.stringify(assignments) }, {merge:true}); }
+    catch(e){ console.error(e); toast('Σφάλμα αποθήκευσης'); }
+  } else {
+    try{ localStorage.setItem(PLAN_KEY, JSON.stringify(assignments)); }
+    catch(e){ console.error(e); toast('Σφάλμα αποθήκευσης'); }
+  }
 }
 
 // ---------- guest list logic ----------
