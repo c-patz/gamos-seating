@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="UTF-8">
-<title>NOTO CLASSIC - Λίστα Καλεσμένων &amp; Κάτοψη</title>
+<title>NOTO CLASSIC - Ξ›Ξ―ΟƒΟ„Ξ± ΞΞ±Ξ»ΞµΟƒΞΌΞ­Ξ½Ο‰Ξ½ &amp; ΞΞ¬Ο„ΞΏΟΞ·</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -62,16 +62,16 @@
 <body>
 
 <header>
-  <h1>💍 NOTO CLASSIC — Οργάνωση Γάμου</h1>
+  <h1>π’ NOTO CLASSIC β€” ΞΟΞ³Ξ¬Ξ½Ο‰ΟƒΞ· Ξ“Ξ¬ΞΌΞΏΟ…</h1>
   <nav>
-    <button id="tabListBtn" class="active">Λίστα Καλεσμένων</button>
-    <button id="tabPlanBtn">Κάτοψη</button>
+    <button id="tabListBtn" class="active">Ξ›Ξ―ΟƒΟ„Ξ± ΞΞ±Ξ»ΞµΟƒΞΌΞ­Ξ½Ο‰Ξ½</button>
+    <button id="tabPlanBtn">ΞΞ¬Ο„ΞΏΟΞ·</button>
   </nav>
 </header>
 
 <div id="configBanner" style="background:#fff3cd;border-bottom:1px solid #e0c46c;padding:14px 24px;font-size:13px;display:none;">
-  <b>⚠ Ρύθμιση online βάσης δεδομένων:</b> δεν έχουν συμπληρωθεί τα Firebase κλειδιά στο αρχείο.
-  Η λίστα αποθηκεύεται προσωρινά μόνο σε αυτόν τον browser. Δείτε τις οδηγίες που σου έδωσε ο Claude.
+  <b>β  Ξ΅ΟΞΈΞΌΞΉΟƒΞ· online Ξ²Ξ¬ΟƒΞ·Ο‚ Ξ΄ΞµΞ΄ΞΏΞΌΞ­Ξ½Ο‰Ξ½:</b> Ξ΄ΞµΞ½ Ξ­Ο‡ΞΏΟ…Ξ½ ΟƒΟ…ΞΌΟ€Ξ»Ξ·ΟΟ‰ΞΈΞµΞ― Ο„Ξ± Firebase ΞΊΞ»ΞµΞΉΞ΄ΞΉΞ¬ ΟƒΟ„ΞΏ Ξ±ΟΟ‡ΞµΞ―ΞΏ.
+  Ξ— Ξ»Ξ―ΟƒΟ„Ξ± Ξ±Ο€ΞΏΞΈΞ·ΞΊΞµΟΞµΟ„Ξ±ΞΉ Ο€ΟΞΏΟƒΟ‰ΟΞΉΞ½Ξ¬ ΞΌΟΞ½ΞΏ ΟƒΞµ Ξ±Ο…Ο„ΟΞ½ Ο„ΞΏΞ½ browser. Ξ”ΞµΞ―Ο„Ξµ Ο„ΞΉΟ‚ ΞΏΞ΄Ξ·Ξ³Ξ―ΞµΟ‚ Ο€ΞΏΟ… ΟƒΞΏΟ… Ξ­Ξ΄Ο‰ΟƒΞµ ΞΏ Claude.
 </div>
 
 <main>
@@ -79,42 +79,42 @@
 <!-- ============ LIST VIEW ============ -->
 <section id="viewList" class="panel">
   <div class="toolbar">
-    <div class="field"><label>Επώνυμο</label><input id="fSurname" placeholder="π.χ. ΑΔΑΜΙΔΗΣ"></div>
-    <div class="field"><label>Όνομα</label><input id="fName" placeholder="π.χ. ΓΙΩΡΓΟΣ"></div>
-    <div class="field"><label>Άτομα</label><input id="fPeople" type="number" min="0" value="1" style="width:70px"></div>
-    <div class="field"><label>+ Καρότσι;</label><input id="fStroller" type="number" min="0" value="0" style="width:60px"></div>
-    <div class="field"><label>Τραπέζι</label><input id="fTable" type="number" min="1" style="width:70px"></div>
-    <button class="primary" id="addBtn">+ Προσθήκη</button>
-    <button class="secondary" id="exportBtn">⬇ Λήψη Excel</button>
+    <div class="field"><label>Ξ•Ο€ΟΞ½Ο…ΞΌΞΏ</label><input id="fSurname" placeholder="Ο€.Ο‡. Ξ‘Ξ”Ξ‘ΞΞ™Ξ”Ξ—Ξ£"></div>
+    <div class="field"><label>ΞΞ½ΞΏΞΌΞ±</label><input id="fName" placeholder="Ο€.Ο‡. Ξ“Ξ™Ξ©Ξ΅Ξ“ΞΞ£"></div>
+    <div class="field"><label>Ξ†Ο„ΞΏΞΌΞ±</label><input id="fPeople" type="number" min="0" value="1" style="width:70px"></div>
+    <div class="field"><label>+ ΞΞ±ΟΟΟ„ΟƒΞΉ;</label><input id="fStroller" type="number" min="0" value="0" style="width:60px"></div>
+    <div class="field"><label>Ξ¤ΟΞ±Ο€Ξ­Ξ¶ΞΉ</label><input id="fTable" type="number" min="1" style="width:70px"></div>
+    <button class="primary" id="addBtn">+ Ξ ΟΞΏΟƒΞΈΞ®ΞΊΞ·</button>
+    <button class="secondary" id="exportBtn">β¬‡ Ξ›Ξ®ΟΞ· Excel</button>
   </div>
 
   <div class="summary" id="summaryBar"></div>
 
   <table>
     <thead><tr>
-      <th>Ονοματεπώνυμο</th><th>Άτομα</th><th>Τραπέζι</th><th></th>
+      <th>ΞΞ½ΞΏΞΌΞ±Ο„ΞµΟ€ΟΞ½Ο…ΞΌΞΏ</th><th>Ξ†Ο„ΞΏΞΌΞ±</th><th>Ξ¤ΟΞ±Ο€Ξ­Ξ¶ΞΉ</th><th></th>
     </tr></thead>
     <tbody id="guestRows"></tbody>
   </table>
 
   <p class="note">
-    * Η αρίθμηση τραπεζιών ξεκινά από το <b>1 = Νυφικό τραπέζι</b> (μέγιστο 10 άτομα: ζευγάρι, γονείς, κουμπάροι).
-    Για παιδιά γράψτε το σύνολο ατόμων (π.χ. 2 ενήλικες + 1 παιδί = 3). Για μωρό σε καρότσι χρησιμοποιήστε το πεδίο «+ Καρότσι» (εμφανίζεται ως 2+1κ).
-    Οι ροτόντες χωρούν 10, 11 ή 12 άτομα.
+    * Ξ— Ξ±ΟΞ―ΞΈΞΌΞ·ΟƒΞ· Ο„ΟΞ±Ο€ΞµΞ¶ΞΉΟΞ½ ΞΎΞµΞΊΞΉΞ½Ξ¬ Ξ±Ο€Ο Ο„ΞΏ <b>1 = ΞΟ…Ο†ΞΉΞΊΟ Ο„ΟΞ±Ο€Ξ­Ξ¶ΞΉ</b> (ΞΌΞ­Ξ³ΞΉΟƒΟ„ΞΏ 10 Ξ¬Ο„ΞΏΞΌΞ±: Ξ¶ΞµΟ…Ξ³Ξ¬ΟΞΉ, Ξ³ΞΏΞ½ΞµΞ―Ο‚, ΞΊΞΏΟ…ΞΌΟ€Ξ¬ΟΞΏΞΉ).
+    Ξ“ΞΉΞ± Ο€Ξ±ΞΉΞ΄ΞΉΞ¬ Ξ³ΟΞ¬ΟΟ„Ξµ Ο„ΞΏ ΟƒΟΞ½ΞΏΞ»ΞΏ Ξ±Ο„ΟΞΌΟ‰Ξ½ (Ο€.Ο‡. 2 ΞµΞ½Ξ®Ξ»ΞΉΞΊΞµΟ‚ + 1 Ο€Ξ±ΞΉΞ΄Ξ― = 3). Ξ“ΞΉΞ± ΞΌΟ‰ΟΟ ΟƒΞµ ΞΊΞ±ΟΟΟ„ΟƒΞΉ Ο‡ΟΞ·ΟƒΞΉΞΌΞΏΟ€ΞΏΞΉΞ®ΟƒΟ„Ξµ Ο„ΞΏ Ο€ΞµΞ΄Ξ―ΞΏ Β«+ ΞΞ±ΟΟΟ„ΟƒΞΉΒ» (ΞµΞΌΟ†Ξ±Ξ½Ξ―Ξ¶ΞµΟ„Ξ±ΞΉ Ο‰Ο‚ 2+1ΞΊ).
+    ΞΞΉ ΟΞΏΟ„ΟΞ½Ο„ΞµΟ‚ Ο‡Ο‰ΟΞΏΟΞ½ 10, 11 Ξ® 12 Ξ¬Ο„ΞΏΞΌΞ±.
   </p>
 </section>
 
 <!-- ============ FLOOR PLAN VIEW ============ -->
 <section id="viewPlan" class="panel hidden">
   <p class="note" style="margin-top:0">
-    Πατήστε σε ένα τραπέζι για να του δώσετε αριθμό. Ο αριθμός εμφανίζεται μέσα στον κύκλο και το σύνολο ατόμων (από τη λίστα καλεσμένων) ακριβώς από πάνω. Κόκκινο χρώμα = υπερβαίνει τα 12 άτομα.
+    Ξ Ξ±Ο„Ξ®ΟƒΟ„Ξµ ΟƒΞµ Ξ­Ξ½Ξ± Ο„ΟΞ±Ο€Ξ­Ξ¶ΞΉ Ξ³ΞΉΞ± Ξ½Ξ± Ο„ΞΏΟ… Ξ΄ΟΟƒΞµΟ„Ξµ Ξ±ΟΞΉΞΈΞΌΟ. Ξ Ξ±ΟΞΉΞΈΞΌΟΟ‚ ΞµΞΌΟ†Ξ±Ξ½Ξ―Ξ¶ΞµΟ„Ξ±ΞΉ ΞΌΞ­ΟƒΞ± ΟƒΟ„ΞΏΞ½ ΞΊΟΞΊΞ»ΞΏ ΞΊΞ±ΞΉ Ο„ΞΏ ΟƒΟΞ½ΞΏΞ»ΞΏ Ξ±Ο„ΟΞΌΟ‰Ξ½ (Ξ±Ο€Ο Ο„Ξ· Ξ»Ξ―ΟƒΟ„Ξ± ΞΊΞ±Ξ»ΞµΟƒΞΌΞ­Ξ½Ο‰Ξ½) Ξ±ΞΊΟΞΉΞ²ΟΟ‚ Ξ±Ο€Ο Ο€Ξ¬Ξ½Ο‰. ΞΟΞΊΞΊΞΉΞ½ΞΏ Ο‡ΟΟΞΌΞ± = Ο…Ο€ΞµΟΞ²Ξ±Ξ―Ξ½ΞµΞΉ Ο„Ξ± 12 Ξ¬Ο„ΞΏΞΌΞ±.
   </p>
   <div id="planSvgWrap"></div>
   <div class="legend">
-    <span><i class="dot" style="background:var(--bride);border-color:#2c8aa6"></i> Νυφικό τραπέζι (Νο 1)</span>
-    <span><i class="dot" style="background:var(--table);border-color:var(--table-line)"></i> Ανατεθειμένο τραπέζι</span>
-    <span><i class="dot" style="background:#f0ede7;border-color:#cfc7ba"></i> Χωρίς αριθμό</span>
-    <span><i class="dot" style="background:#f3b59a;border-color:var(--warn)"></i> Υπερβολή ατόμων (&gt;12)</span>
+    <span><i class="dot" style="background:var(--bride);border-color:#2c8aa6"></i> ΞΟ…Ο†ΞΉΞΊΟ Ο„ΟΞ±Ο€Ξ­Ξ¶ΞΉ (ΞΞΏ 1)</span>
+    <span><i class="dot" style="background:var(--table);border-color:var(--table-line)"></i> Ξ‘Ξ½Ξ±Ο„ΞµΞΈΞµΞΉΞΌΞ­Ξ½ΞΏ Ο„ΟΞ±Ο€Ξ­Ξ¶ΞΉ</span>
+    <span><i class="dot" style="background:#f0ede7;border-color:#cfc7ba"></i> Ξ§Ο‰ΟΞ―Ο‚ Ξ±ΟΞΉΞΈΞΌΟ</span>
+    <span><i class="dot" style="background:#f3b59a;border-color:var(--warn)"></i> Ξ¥Ο€ΞµΟΞ²ΞΏΞ»Ξ® Ξ±Ο„ΟΞΌΟ‰Ξ½ (&gt;12)</span>
   </div>
 </section>
 
@@ -122,11 +122,11 @@
 
 <dialog id="numDialog">
   <div class="box">
-    <h3 id="dialogTitle">Αριθμός τραπεζιού</h3>
+    <h3 id="dialogTitle">Ξ‘ΟΞΉΞΈΞΌΟΟ‚ Ο„ΟΞ±Ο€ΞµΞ¶ΞΉΞΏΟ</h3>
     <input id="dialogInput" type="number" min="1" style="width:100%;font-size:18px;padding:10px;">
     <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;">
-      <button class="secondary" id="dialogClear">Καθαρισμός</button>
-      <button class="secondary" id="dialogCancel">Άκυρο</button>
+      <button class="secondary" id="dialogClear">ΞΞ±ΞΈΞ±ΟΞΉΟƒΞΌΟΟ‚</button>
+      <button class="secondary" id="dialogCancel">Ξ†ΞΊΟ…ΟΞΏ</button>
       <button class="primary" id="dialogOk">OK</button>
     </div>
   </div>
@@ -136,7 +136,7 @@
 
 <script>
 // ====================== FIREBASE CONFIG ======================
-// Βάλε εδώ τα κλειδιά του Firebase project σου (Project settings -> General -> Your apps -> SDK config)
+// Ξ’Ξ¬Ξ»Ξµ ΞµΞ΄Ο Ο„Ξ± ΞΊΞ»ΞµΞΉΞ΄ΞΉΞ¬ Ο„ΞΏΟ… Firebase project ΟƒΞΏΟ… (Project settings -> General -> Your apps -> SDK config)
 const firebaseConfig = {
   apiKey: "AIzaSyAbURtjSLctoKR0ySIyC04ioMhfPMUw0hU",
   authDomain: "gamos-2026.firebaseapp.com",
@@ -188,7 +188,7 @@ async function loadAll(){
       const data = snap.exists ? snap.data() : {};
       guests = data.guests ? JSON.parse(data.guests) : [];
       assignments = data.assignments ? JSON.parse(data.assignments) : {};
-    }catch(e){ console.error(e); toast('Σφάλμα σύνδεσης με τη βάση'); guests=[]; assignments={}; }
+    }catch(e){ console.error(e); toast('Ξ£Ο†Ξ¬Ξ»ΞΌΞ± ΟƒΟΞ½Ξ΄ΞµΟƒΞ·Ο‚ ΞΌΞµ Ο„Ξ· Ξ²Ξ¬ΟƒΞ·'); guests=[]; assignments={}; }
     // live sync: refresh UI automatically when data changes on another device
     DOC_REF().onSnapshot(snap=>{
       if(!snap.exists) return;
@@ -208,19 +208,19 @@ async function loadAll(){
 async function saveGuests(){
   if(firebaseReady){
     try{ await DOC_REF().set({ guests: JSON.stringify(guests) }, {merge:true}); }
-    catch(e){ console.error(e); toast('Σφάλμα αποθήκευσης'); }
+    catch(e){ console.error(e); toast('Ξ£Ο†Ξ¬Ξ»ΞΌΞ± Ξ±Ο€ΞΏΞΈΞ®ΞΊΞµΟ…ΟƒΞ·Ο‚'); }
   } else {
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(guests)); }
-    catch(e){ console.error(e); toast('Σφάλμα αποθήκευσης'); }
+    catch(e){ console.error(e); toast('Ξ£Ο†Ξ¬Ξ»ΞΌΞ± Ξ±Ο€ΞΏΞΈΞ®ΞΊΞµΟ…ΟƒΞ·Ο‚'); }
   }
 }
 async function saveAssignments(){
   if(firebaseReady){
     try{ await DOC_REF().set({ assignments: JSON.stringify(assignments) }, {merge:true}); }
-    catch(e){ console.error(e); toast('Σφάλμα αποθήκευσης'); }
+    catch(e){ console.error(e); toast('Ξ£Ο†Ξ¬Ξ»ΞΌΞ± Ξ±Ο€ΞΏΞΈΞ®ΞΊΞµΟ…ΟƒΞ·Ο‚'); }
   } else {
     try{ localStorage.setItem(PLAN_KEY, JSON.stringify(assignments)); }
-    catch(e){ console.error(e); toast('Σφάλμα αποθήκευσης'); }
+    catch(e){ console.error(e); toast('Ξ£Ο†Ξ¬Ξ»ΞΌΞ± Ξ±Ο€ΞΏΞΈΞ®ΞΊΞµΟ…ΟƒΞ·Ο‚'); }
   }
 }
 
@@ -232,7 +232,7 @@ function sortedGuests(){
   return [...guests].sort((a,b)=> greekCollate(a.surname+a.name, b.surname+b.name));
 }
 function peopleLabel(g){
-  if(g.stroller && g.stroller>0) return `${g.people}+${g.stroller}κ`;
+  if(g.stroller && g.stroller>0) return `${g.people}+${g.stroller}ΞΊ`;
   return String(g.people);
 }
 function peopleTotal(g){
@@ -247,9 +247,9 @@ function renderGuestRows(){
     tr.innerHTML = `
       <td>${g.surname} ${g.name}</td>
       <td><span class="pill">${peopleLabel(g)}</span></td>
-      <td>${g.table ? g.table : '—'}</td>
+      <td>${g.table ? g.table : 'β€”'}</td>
       <td class="actions">
-        <button title="Διαγραφή" data-id="${g.id}" class="delBtn">🗑️</button>
+        <button title="Ξ”ΞΉΞ±Ξ³ΟΞ±Ο†Ξ®" data-id="${g.id}" class="delBtn">π—‘οΈ</button>
       </td>`;
     tbody.appendChild(tr);
   });
@@ -268,11 +268,11 @@ function renderSummary(){
   const totalStrollers = guests.reduce((s,g)=>s+(g.stroller||0),0);
   const tablesUsed = new Set(guests.filter(g=>g.table).map(g=>g.table)).size;
   document.getElementById('summaryBar').innerHTML = `
-    <div class="stat"><b>${guests.length}</b>Εγγραφές</div>
-    <div class="stat"><b>${totalGuests}</b>Σύνολο ατόμων (+καρότσια)</div>
-    <div class="stat"><b>${totalAdults}</b>Σύνολο ατόμων</div>
-    <div class="stat"><b>${totalStrollers}</b>Καρότσια</div>
-    <div class="stat"><b>${tablesUsed}</b>Τραπέζια σε χρήση</div>
+    <div class="stat"><b>${guests.length}</b>Ξ•Ξ³Ξ³ΟΞ±Ο†Ξ­Ο‚</div>
+    <div class="stat"><b>${totalGuests}</b>Ξ£ΟΞ½ΞΏΞ»ΞΏ Ξ±Ο„ΟΞΌΟ‰Ξ½ (+ΞΊΞ±ΟΟΟ„ΟƒΞΉΞ±)</div>
+    <div class="stat"><b>${totalAdults}</b>Ξ£ΟΞ½ΞΏΞ»ΞΏ Ξ±Ο„ΟΞΌΟ‰Ξ½</div>
+    <div class="stat"><b>${totalStrollers}</b>ΞΞ±ΟΟΟ„ΟƒΞΉΞ±</div>
+    <div class="stat"><b>${tablesUsed}</b>Ξ¤ΟΞ±Ο€Ξ­Ξ¶ΞΉΞ± ΟƒΞµ Ο‡ΟΞ®ΟƒΞ·</div>
   `;
 }
 
@@ -287,7 +287,7 @@ async function addGuest(){
   const people = parseInt(document.getElementById('fPeople').value)||0;
   const stroller = parseInt(document.getElementById('fStroller').value)||0;
   const table = document.getElementById('fTable').value.trim();
-  if(!surname || !name){ toast('Συμπληρώστε επώνυμο και όνομα'); return; }
+  if(!surname || !name){ toast('Ξ£Ο…ΞΌΟ€Ξ»Ξ·ΟΟΟƒΟ„Ξµ ΞµΟ€ΟΞ½Ο…ΞΌΞΏ ΞΊΞ±ΞΉ ΟΞ½ΞΏΞΌΞ±'); return; }
   guests.push({ id: Date.now()+'_'+Math.random().toString(36).slice(2),
                 surname, name, people, stroller, table: table || '' });
   await saveGuests();
@@ -297,19 +297,19 @@ async function addGuest(){
   document.getElementById('fStroller').value='0';
   document.getElementById('fTable').value='';
   renderAll();
-  toast('Προστέθηκε');
+  toast('Ξ ΟΞΏΟƒΟ„Ξ­ΞΈΞ·ΞΊΞµ');
 }
 
 function exportExcel(){
   const rows = sortedGuests().map(g=>({
-    'Ονοματεπώνυμο': `${g.surname} ${g.name}`,
-    'Άτομα': peopleLabel(g),
-    'Τραπέζι': g.table || ''
+    'ΞΞ½ΞΏΞΌΞ±Ο„ΞµΟ€ΟΞ½Ο…ΞΌΞΏ': `${g.surname} ${g.name}`,
+    'Ξ†Ο„ΞΏΞΌΞ±': peopleLabel(g),
+    'Ξ¤ΟΞ±Ο€Ξ­Ξ¶ΞΉ': g.table || ''
   }));
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [{wch:30},{wch:10},{wch:10}];
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Καλεσμένοι');
+  XLSX.utils.book_append_sheet(wb, ws, 'ΞΞ±Ξ»ΞµΟƒΞΌΞ­Ξ½ΞΏΞΉ');
   XLSX.writeFile(wb, 'Lista_Kalesmenon.xlsx');
 }
 
@@ -368,10 +368,10 @@ function buildSvg(){
   // structural labels
   svg += `<rect x="10" y="55" width="190" height="30" fill="#cfe8e4" stroke="#5f9ea0"/>`;
   svg += `<text x="105" y="75" class="label" style="font-weight:700">NOTO CLASSIC</text>`;
-  svg += `<text x="60" y="445" class="label">ΕΙΣΟΔΟΣ</text>`;
+  svg += `<text x="60" y="445" class="label">Ξ•Ξ™Ξ£ΞΞ”ΞΞ£</text>`;
   svg += `<text x="1040" y="420" class="label">W.C</text>`;
   svg += `<rect x="380" y="412" width="230" height="26" fill="#f4efe7" stroke="#cfc7ba"/>`;
-  svg += `<text x="495" y="430" class="label">Καναπέδες / Ορχήστρα</text>`;
+  svg += `<text x="495" y="430" class="label">ΞΞ±Ξ½Ξ±Ο€Ξ­Ξ΄ΞµΟ‚ / ΞΟΟ‡Ξ®ΟƒΟ„ΟΞ±</text>`;
   svg += `<rect x="610" y="412" width="55" height="26" fill="#f4efe7" stroke="#cfc7ba"/>`;
   svg += `<text x="637" y="430" class="label">D.J</text>`;
   svg += `<text x="940" y="220" class="label" style="font-weight:700">BAR</text>`;
@@ -404,7 +404,7 @@ function renderPlan(){
 
 function openSeatDialog(seatId){
   const seat = SEATS.find(s=>s.id===seatId);
-  if(seat.bride){ toast('Το νυφικό τραπέζι είναι σταθερά το Νο 1'); return; }
+  if(seat.bride){ toast('Ξ¤ΞΏ Ξ½Ο…Ο†ΞΉΞΊΟ Ο„ΟΞ±Ο€Ξ­Ξ¶ΞΉ ΞµΞ―Ξ½Ξ±ΞΉ ΟƒΟ„Ξ±ΞΈΞµΟΞ¬ Ο„ΞΏ ΞΞΏ 1'); return; }
   currentSeatId = seatId;
   document.getElementById('dialogInput').value = assignments[seatId] || '';
   const dlg = document.getElementById('numDialog');
