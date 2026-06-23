@@ -31,11 +31,13 @@
   button.secondary{background:#fff;border:1px solid var(--line);padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;}
   
   .table-group { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 20px; background: #fff; overflow: hidden; }
-  .table-group-header { background: #f5efe6; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
+  .table-group-header { background: #f5efe6; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); flex-wrap: wrap; gap: 10px; }
   .table-group-title { font-weight: bold; color: var(--accent-dark); font-size: 15px; }
-  .table-group-actions { display: flex; gap: 8px; }
+  .table-group-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .table-group-actions button { padding: 4px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink); }
   .table-group-actions button:hover { background: #fdfbf7; }
+  .btn-delete-table { color: var(--warn) !important; border-color: #f7b3a0 !important; }
+  .btn-delete-table:hover { background: #fef5f3 !important; }
 
   table {width:100%;border-collapse:collapse;font-size:14px;}
   th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;border-bottom:2px solid var(--line);padding:8px 6px;}
@@ -277,7 +279,6 @@ async function saveSeating(){
 
 function greekCollate(a,b){ return a.localeCompare(b,'el'); }
 
-// Helpers για υπολογισμό ατόμων
 function getAdults(g) { return g.adults !== undefined ? g.adults : (g.people || 0); }
 function getChildren(g) { return g.children || 0; }
 
@@ -328,6 +329,7 @@ function createGroupDOM(tableNum, tableGuests, container, isRealTable) {
     headerHtml += `
       <button onclick="renameTablePrompt('${tableNum}')">✏️ Μετονομασία</button>
       <button onclick="addGuestToTablePrompt('${tableNum}')">➕ Προσθήκη Εδώ</button>
+      <button class="btn-delete-table" onclick="deleteTablePrompt('${tableNum}')">🗑️ Διαγραφή</button>
     `;
   }
   headerHtml += `</div></div>`;
@@ -403,6 +405,27 @@ window.renameTablePrompt = async (oldTableNum) => {
   Object.keys(assignments).forEach(seatId => { if(String(assignments[seatId]) === String(oldTableNum)) assignments[seatId] = cleanNew; });
   await saveGuests(); await saveSeating();
   renderAll(); toast('Το τραπέζι μετονομάστηκε!');
+};
+
+window.deleteTablePrompt = async (tableNum) => {
+  if(!confirm(`ΠΡΟΣΟΧΗ: Θέλετε σίγουρα να διαγράψετε το Τραπέζι ${tableNum};\n\nΟι καλεσμένοι που κάθονται εδώ ΔΕΝ θα διαγραφούν, απλά θα μεταφερθούν στην ομάδα "Χωρίς Τραπέζι". Επίσης, θα διαγραφεί η αρίθμηση από την κάτοψη.`)) return;
+  
+  // Αφαίρεση τραπεζιού από τους καλεσμένους
+  guests.forEach(g => { if(String(g.table) === String(tableNum)) g.table = ''; });
+  
+  // Αφαίρεση τραπεζιού από την κάτοψη
+  Object.keys(assignments).forEach(seatId => {
+    if(String(assignments[seatId]) === String(tableNum)) {
+      delete assignments[seatId];
+      delete capacities[seatId];
+    }
+  });
+
+  await saveGuests(); 
+  await saveSeating();
+  renderAll();
+  if(!document.getElementById('viewPlan').classList.contains('hidden')) renderPlan();
+  toast(`Το Τραπέζι ${tableNum} διαγράφηκε!`);
 };
 
 window.moveGuestPrompt = async (guestId, currentTable) => {
@@ -504,9 +527,9 @@ const NORMAL_COORDS = [
 function buildSeatLayout(){
   const seats = []; let id=0;
   NORMAL_COORDS.forEach(([x,y])=> {
-    // Το κεντρικό τραπέζι στη θέση [385,80] θα είναι τετράγωνο
-    const isSquare = (x === 385 && y === 80);
-    seats.push({id:'s'+(id++), x, y, isSquare});
+    // Το κεντρικό τραπέζι στη θέση [385,80] θα είναι ορθογώνιο
+    const isRect = (x === 385 && y === 80);
+    seats.push({id:'s'+(id++), x, y, isRect});
   });
   return seats;
 }
@@ -543,9 +566,9 @@ function buildSvg(){
     else if(total===cap){ seatClass='seat-full'; capClass='full'; } 
     else { seatClass='seat-ok'; capClass='ok'; }
 
-    // Σχεδιασμός σχήματος (Τετράγωνο vs Στρογγυλό)
-    let shapeNode = seat.isSquare 
-      ? `<rect x="${seat.x - 20}" y="${seat.y - 20}" width="40" height="40" rx="6" class="seat ${seatClass}"/>`
+    // Σχεδιασμός σχήματος (Ορθογώνιο vs Στρογγυλό)
+    let shapeNode = seat.isRect 
+      ? `<rect x="${seat.x - 45}" y="${seat.y - 18}" width="90" height="36" rx="4" class="seat ${seatClass}"/>`
       : `<circle cx="${seat.x}" cy="${seat.y}" r="${r}" class="seat ${seatClass}"/>`;
 
     svg += `<g data-seat="${seat.id}" class="seatGroup" style="cursor:pointer">
