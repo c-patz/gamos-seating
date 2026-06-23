@@ -30,7 +30,6 @@
   button.primary:hover{background:var(--accent-dark);}
   button.secondary{background:#fff;border:1px solid var(--line);padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;}
   
-  /* Νέα στυλ για την Ομαδοποίηση των Τραπεζιών */
   .table-group { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 20px; background: #fff; overflow: hidden; }
   .table-group-header { background: #f5efe6; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
   .table-group-title { font-weight: bold; color: var(--accent-dark); font-size: 15px; }
@@ -43,7 +42,8 @@
   td{padding:7px 6px;border-bottom:1px solid var(--line);}
   tr:hover td{background:#fbf8f4;}
   .pill{display:inline-block;background:var(--table);border:1px solid var(--table-line);border-radius:20px;padding:2px 10px;font-weight:600;font-size:13px;}
-  .actions button{background:none;border:none;cursor:pointer;font-size:15px;padding:2px 6px;}
+  .actions button{background:none;border:none;cursor:pointer;font-size:15px;padding:4px;}
+  .actions button:hover { transform: scale(1.1); }
   .summary{display:flex;gap:16px;margin:14px 0;flex-wrap:wrap;}
   .stat{background:#f4efe7;border-radius:10px;padding:10px 16px;font-size:13px;}
   .stat b{font-size:18px;display:block;color:var(--accent-dark);}
@@ -75,7 +75,8 @@
   .chip{background:#fff3e0;border:1px solid #e7c98f;border-radius:20px;padding:4px 12px;font-size:12.5px;}
   .chip b{color:var(--accent-dark);}
   dialog{border:none;border-radius:14px;padding:0;}
-  dialog .box{padding:20px;min-width:260px;}
+  dialog::backdrop { background: rgba(0,0,0,0.4); }
+  dialog .box{padding:20px;min-width:300px;}
   dialog h3{margin-top:0;}
   .hidden{display:none;}
   #toast{position:fixed;bottom:20px;right:20px;background:#2b2b2b;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .3s;z-index:9999;}
@@ -103,8 +104,9 @@
   <div class="toolbar">
     <div class="field"><label>Επώνυμο</label><input id="fSurname" placeholder="π.χ. ΑΔΑΜΙΔΗΣ"></div>
     <div class="field"><label>Όνομα</label><input id="fName" placeholder="π.χ. ΓΙΩΡΓΟΣ"></div>
-    <div class="field"><label>Άτομα</label><input id="fPeople" type="number" min="0" value="1" style="width:70px"></div>
-    <div class="field"><label>+ Καρότσι;</label><input id="fStroller" type="number" min="0" value="0" style="width:60px"></div>
+    <div class="field"><label>Ενήλικες</label><input id="fAdults" type="number" min="1" value="2" style="width:70px"></div>
+    <div class="field"><label>Παιδιά</label><input id="fChildren" type="number" min="0" value="0" style="width:70px"></div>
+    <div class="field"><label>Καρότσι</label><input id="fStroller" type="number" min="0" value="0" style="width:70px"></div>
     <div class="field"><label>Τραπέζι</label><input id="fTable" type="text" placeholder="π.χ. 1, 2..." style="width:70px"></div>
     <button class="primary" id="addBtn">+ Προσθήκη</button>
     <button class="secondary" id="exportBtn">⬇ Λήψη Excel</button>
@@ -139,6 +141,23 @@
 </section>
 
 </main>
+
+<dialog id="editGuestDialog">
+  <div class="box">
+    <h3 style="margin-bottom:15px; color:var(--accent-dark);">Επεξεργασία Καλεσμένου</h3>
+    <div class="field" style="margin-bottom:10px;"><label>Επώνυμο</label><input id="editSurname" type="text" style="width:100%"></div>
+    <div class="field" style="margin-bottom:10px;"><label>Όνομα</label><input id="editName" type="text" style="width:100%"></div>
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <div class="field" style="flex:1;"><label>Ενήλικες</label><input id="editAdults" type="number" min="0" style="width:100%"></div>
+      <div class="field" style="flex:1;"><label>Παιδιά</label><input id="editChildren" type="number" min="0" style="width:100%"></div>
+      <div class="field" style="flex:1;"><label>Καρότσια</label><input id="editStroller" type="number" min="0" style="width:100%"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="secondary" onclick="document.getElementById('editGuestDialog').close()">Άκυρο</button>
+      <button class="primary" id="btnSaveEditGuest">Αποθήκευση</button>
+    </div>
+  </div>
+</dialog>
 
 <dialog id="numDialog">
   <div class="box">
@@ -202,6 +221,7 @@ let guests = [];
 let assignments = {}; 
 let capacities = {};  
 let currentSeatId = null;
+let currentEditGuestId = null;
 
 function toast(msg){
   const t = document.getElementById('toast');
@@ -253,11 +273,17 @@ async function saveSeating(){
 }
 
 function greekCollate(a,b){ return a.localeCompare(b,'el'); }
+
+// Helpers για υπολογισμό ατόμων (Ενήλικες + Παιδιά)
+function getAdults(g) { return g.adults !== undefined ? g.adults : (g.people || 0); }
+function getChildren(g) { return g.children || 0; }
+
 function peopleLabel(g){
-  if(g.stroller && g.stroller>0) return `${g.people}+${g.stroller}κ`;
-  return String(g.people);
+  const p = getAdults(g) + getChildren(g);
+  if(g.stroller && g.stroller>0) return `${p}+${g.stroller}κ`;
+  return String(p);
 }
-function peopleTotal(g){ return (g.people||0) + (g.stroller||0); }
+function peopleTotal(g){ return getAdults(g) + getChildren(g) + (g.stroller||0); }
 function tableTotal(tableNum){
   return guests.filter(g=>String(g.table)===String(tableNum)).reduce((s,g)=>s+peopleTotal(g),0);
 }
@@ -267,20 +293,17 @@ function renderTableGroups() {
   const container = document.getElementById('tablesContainer');
   container.innerHTML = '';
 
-  // Εύρεση όλων των μοναδικών τραπεζιών (από τη λίστα και από την κάτοψη)
   const tableSet = new Set();
   guests.forEach(g => { if(g.table) tableSet.add(String(g.table)); });
   Object.values(assignments).forEach(t => { if(t) tableSet.add(String(t)); });
   
   const uniqueTables = Array.from(tableSet).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
   
-  // Καλεσμένοι χωρίς τραπέζι
   const unassignedGuests = guests.filter(g => !g.table);
   if(unassignedGuests.length > 0) {
     createGroupDOM("Χωρίς Τραπέζι", unassignedGuests, container, false);
   }
 
-  // Δημιουργία DOM για κάθε ομάδα/τραπέζι
   uniqueTables.forEach(tNum => {
     const tableGuests = guests.filter(g => String(g.table) === tNum).sort((a,b)=> greekCollate(a.surname+a.name, b.surname+b.name));
     createGroupDOM(tNum, tableGuests, container, true);
@@ -315,7 +338,7 @@ function createGroupDOM(tableNum, tableGuests, container, isRealTable) {
   }
 
   const table = document.createElement('table');
-  table.innerHTML = `<thead><tr><th>Ονοματεπώνυμο</th><th>Άτομα</th><th style="width:180px">Ενέργειες</th></tr></thead>`;
+  table.innerHTML = `<thead><tr><th>Ονοματεπώνυμο</th><th>Άτομα</th><th style="width:130px; text-align:right;">Ενέργειες</th></tr></thead>`;
   const tbody = document.createElement('tbody');
 
   tableGuests.forEach(g => {
@@ -323,8 +346,9 @@ function createGroupDOM(tableNum, tableGuests, container, isRealTable) {
     tr.innerHTML = `
       <td>${g.surname} ${g.name}</td>
       <td><span class="pill">${peopleLabel(g)}</span></td>
-      <td class="actions">
-        <button title="Μετακίνηση σε άλλο τραπέζι" onclick="moveGuestPrompt('${g.id}', '${g.table}')">🔁 Μετακίνηση</button>
+      <td class="actions" style="text-align:right;">
+        <button title="Επεξεργασία" onclick="editGuestPrompt('${g.id}')">✏️</button>
+        <button title="Μετακίνηση" onclick="moveGuestPrompt('${g.id}', '${g.table}')">🔁</button>
         <button title="Διαγραφή" onclick="deleteGuest('${g.id}')">🗑️</button>
       </td>
     `;
@@ -337,45 +361,64 @@ function createGroupDOM(tableNum, tableGuests, container, isRealTable) {
 }
 
 // ---------- ΔΙΑΔΡΑΣΤΙΚΕΣ ΛΕΙΤΟΥΡΓΙΕΣ ΚΟΥΜΠΙΩΝ ----------
+
+// Επεξεργασία Καλεσμένου (Άνοιγμα Dialog)
+window.editGuestPrompt = (id) => {
+  const g = guests.find(x => x.id === id);
+  if(!g) return;
+  currentEditGuestId = id;
+  document.getElementById('editSurname').value = g.surname || '';
+  document.getElementById('editName').value = g.name || '';
+  document.getElementById('editAdults').value = getAdults(g);
+  document.getElementById('editChildren').value = getChildren(g);
+  document.getElementById('editStroller').value = g.stroller || 0;
+  document.getElementById('editGuestDialog').showModal();
+};
+
+// Αποθήκευση αλλαγών Καλεσμένου
+document.getElementById('btnSaveEditGuest').onclick = async () => {
+  if(!currentEditGuestId) return;
+  const g = guests.find(x => x.id === currentEditGuestId);
+  if(g) {
+    g.surname = document.getElementById('editSurname').value.trim().toUpperCase();
+    g.name = document.getElementById('editName').value.trim().toUpperCase();
+    g.adults = parseInt(document.getElementById('editAdults').value) || 0;
+    g.children = parseInt(document.getElementById('editChildren').value) || 0;
+    g.stroller = parseInt(document.getElementById('editStroller').value) || 0;
+    // Επειδή καταργήσαμε το παλιό 'people', το διαγράφουμε (αν υπάρχει) για καθαριότητα
+    delete g.people; 
+    
+    await saveGuests();
+    renderAll();
+    toast('Αποθηκεύτηκε επιτυχώς!');
+  }
+  document.getElementById('editGuestDialog').close();
+};
+
 window.renameTablePrompt = async (oldTableNum) => {
   const newTableNum = prompt(`Αλλαγή αριθμού για το Τραπέζι ${oldTableNum}.\nΕισάγετε το νέο νούμερο:`, oldTableNum);
   if(!newTableNum || newTableNum.trim() === "" || newTableNum.trim() === oldTableNum) return;
-  
   const cleanNew = newTableNum.trim();
-  
-  // 1. Αλλαγή στους καλεσμένους
-  guests.forEach(g => {
-    if(String(g.table) === String(oldTableNum)) g.table = cleanNew;
-  });
-  
-  // 2. Αλλαγή στην κάτοψη
-  Object.keys(assignments).forEach(seatId => {
-    if(String(assignments[seatId]) === String(oldTableNum)) {
-      assignments[seatId] = cleanNew;
-    }
-  });
-
-  await saveGuests();
-  await saveSeating();
-  renderAll();
-  toast('Το τραπέζι μετονομάστηκε!');
+  guests.forEach(g => { if(String(g.table) === String(oldTableNum)) g.table = cleanNew; });
+  Object.keys(assignments).forEach(seatId => { if(String(assignments[seatId]) === String(oldTableNum)) assignments[seatId] = cleanNew; });
+  await saveGuests(); await saveSeating();
+  renderAll(); toast('Το τραπέζι μετονομάστηκε!');
 };
 
 window.moveGuestPrompt = async (guestId, currentTable) => {
   const targetGuest = guests.find(g => g.id === guestId);
   if(!targetGuest) return;
-
   const newTable = prompt(`Μετακίνηση του/της ${targetGuest.surname} ${targetGuest.name}.\nΕισάγετε νέο τραπέζι (αφήστε κενό για "Χωρίς Τραπέζι"):`, currentTable || '');
-  if(newTable === null) return; // Πατήθηκε Άκυρο
-
+  if(newTable === null) return; 
   targetGuest.table = newTable.trim();
-  await saveGuests();
-  renderAll();
-  toast('Ο καλεσμένος μετακινήθηκε επιτυχώς!');
+  await saveGuests(); renderAll(); toast('Ο καλεσμένος μετακινήθηκε!');
 };
 
 window.addGuestToTablePrompt = (tableNum) => {
   document.getElementById('fTable').value = tableNum;
+  document.getElementById('fAdults').value = 2;
+  document.getElementById('fChildren').value = 0;
+  document.getElementById('fStroller').value = 0;
   document.getElementById('fSurname').focus();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   toast(`Έτοιμο για προσθήκη στο Τραπέζι ${tableNum}`);
@@ -384,39 +427,47 @@ window.addGuestToTablePrompt = (tableNum) => {
 window.deleteGuest = async (id) => {
   if(confirm('Διαγραφή καλεσμένου;')){
     guests = guests.filter(g=>g.id !== id);
-    await saveGuests();
-    renderAll();
+    await saveGuests(); renderAll();
   }
 };
 
 // ---------- ΚΛΑΣΙΚΕΣ ΛΕΙΤΟΥΡΓΙΕΣ ----------
 function renderSummary(){
   const totalGuests = guests.reduce((s,g)=>s+peopleTotal(g),0);
-  const totalAdults = guests.reduce((s,g)=>s+(g.people||0),0);
+  const totalAdults = guests.reduce((s,g)=>s+getAdults(g),0);
+  const totalChildren = guests.reduce((s,g)=>s+getChildren(g),0);
   const totalStrollers = guests.reduce((s,g)=>s+(g.stroller||0),0);
   const tablesUsed = new Set(guests.filter(g=>g.table).map(g=>g.table)).size;
   document.getElementById('summaryBar').innerHTML = `
     <div class="stat"><b>${guests.length}</b>Εγγραφές</div>
-    <div class="stat"><b>${totalGuests}</b>Σύνολο ατόμων (+καρότσια)</div>
-    <div class="stat"><b>${totalAdults}</b>Σύνολο ατόμων</div>
+    <div class="stat"><b>${totalGuests}</b>Σύνολο (με καρότσια)</div>
+    <div class="stat"><b>${totalAdults}</b>Ενήλικες</div>
+    <div class="stat"><b>${totalChildren}</b>Παιδιά</div>
     <div class="stat"><b>${totalStrollers}</b>Καρότσια</div>
-    <div class="stat"><b>${tablesUsed}</b>Τραπέζια σε χρήση</div>
+    <div class="stat"><b>${tablesUsed}</b>Τραπέζια</div>
   `;
 }
 
 async function addGuest(){
   const surname = document.getElementById('fSurname').value.trim().toUpperCase();
   const name = document.getElementById('fName').value.trim().toUpperCase();
-  const people = parseInt(document.getElementById('fPeople').value)||0;
+  const adults = parseInt(document.getElementById('fAdults').value)||0;
+  const children = parseInt(document.getElementById('fChildren').value)||0;
   const stroller = parseInt(document.getElementById('fStroller').value)||0;
   const table = document.getElementById('fTable').value.trim();
+  
   if(!surname || !name){ toast('Συμπληρώστε επώνυμο και όνομα'); return; }
-  guests.push({ id: Date.now()+'_'+Math.random().toString(36).slice(2),
-                surname, name, people, stroller, table: table || '' });
+  
+  guests.push({ 
+    id: Date.now()+'_'+Math.random().toString(36).slice(2),
+    surname, name, adults, children, stroller, table: table || '' 
+  });
+  
   await saveGuests();
   document.getElementById('fSurname').value='';
   document.getElementById('fName').value='';
-  document.getElementById('fPeople').value='1';
+  document.getElementById('fAdults').value='2';
+  document.getElementById('fChildren').value='0';
   document.getElementById('fStroller').value='0';
   document.getElementById('fTable').value='';
   renderAll();
@@ -486,8 +537,6 @@ function buildSvg(){
     else if(total===cap){ seatClass='seat-full'; capClass='full'; } 
     else { seatClass='seat-ok'; capClass='ok'; }
 
-    const namesAtTable = tableNum ? guests.filter(g=>String(g.table)===String(tableNum)).map(g=>`${g.surname} ${g.name}`).join(', ') : '';
-
     svg += `<g data-seat="${seat.id}" class="seatGroup" style="cursor:pointer">
       <circle cx="${seat.x}" cy="${seat.y}" r="${r}" class="seat ${seatClass}"/>
       <text x="${seat.x}" y="${seat.y+4.5}" class="${numClass}" style="${seat.bride?'font-size:11px;':''}">${seat.bride ? '1' : (tableNum || '?')}</text>
@@ -526,18 +575,14 @@ document.getElementById('dialogOk').onclick = async ()=>{
   const cap = parseInt(document.getElementById('dialogCapacity').value) || 12;
   if(val){ assignments[currentSeatId] = val; capacities[currentSeatId] = cap; } 
   else { delete assignments[currentSeatId]; delete capacities[currentSeatId]; }
-  await saveSeating();
-  document.getElementById('numDialog').close();
-  renderPlan();
-  renderTableGroups();
+  await saveSeating(); document.getElementById('numDialog').close();
+  renderPlan(); renderTableGroups();
 };
 
 document.getElementById('dialogClear').onclick = async ()=>{
   delete assignments[currentSeatId]; delete capacities[currentSeatId];
-  await saveSeating();
-  document.getElementById('numDialog').close();
-  renderPlan();
-  renderTableGroups();
+  await saveSeating(); document.getElementById('numDialog').close();
+  renderPlan(); renderTableGroups();
 };
 document.getElementById('dialogCancel').onclick = ()=> document.getElementById('numDialog').close();
 
