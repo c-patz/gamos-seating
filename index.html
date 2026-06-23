@@ -10,7 +10,7 @@
   :root{
     --bg:#faf7f2; --panel:#fff; --ink:#2b2b2b; --muted:#8a8378;
     --accent:#b08968; --accent-dark:#7f5539; --line:#e6ddd2;
-    --table:#cfe8e4; --table-line:#5f9ea0; --bride:#5bc0de; --warn:#e0734b;
+    --table:#cfe8e4; --table-line:#5f9ea0; --warn:#e0734b;
   }
   *{box-sizing:border-box;}
   body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--ink);}
@@ -55,7 +55,6 @@
   .seat-ok{fill:#cdeae5;stroke:#3f9089;}
   .seat-full{fill:#ffe2a6;stroke:#c98a1f;}
   .seat-over{fill:#f7b3a0;stroke:#c0432a;}
-  .seat-bride{fill:#7dd3ec;stroke:#1f7f9e;}
   .seatnum{font-size:15px;font-weight:800;fill:#22312e;text-anchor:middle;pointer-events:none;}
   .seatnum.empty-num{fill:#9b9586;font-weight:600;font-size:12px;}
   .seatcap{font-size:11px;font-weight:700;text-anchor:middle;pointer-events:none;}
@@ -99,6 +98,7 @@
 
 <main>
 
+<!-- ============ LIST VIEW ============ -->
 <section id="viewList" class="panel">
   <h3>Γρήγορη Προσθήκη Καλεσμένου</h3>
   <div class="toolbar">
@@ -114,21 +114,22 @@
 
   <div class="summary" id="summaryBar"></div>
 
+  <!-- ΕΔΩ ΕΜΦΑΝΙΖΟΝΤΑΙ ΤΑ ΤΡΑΠΕΖΙΑ ΣΑΝ ΟΜΑΔΕΣ -->
   <div id="tablesContainer"></div>
 
   <p class="note">
-    * Η αρίθμηση τραπεζιών ξεκινά από το <b>1 = Νυφικό τραπέζι</b> (μέγιστο 10 άτομα).
+    * Η αρίθμηση τραπεζιών ξεκινά από το <b>1 = Νυφικό τραπέζι</b>.
     Οι ροτόντες χωρούν 10, 11 ή 12 άτομα.
   </p>
 </section>
 
+<!-- ============ FLOOR PLAN VIEW ============ -->
 <section id="viewPlan" class="panel hidden">
   <p class="note" style="margin-top:0">
     Πατήστε σε ένα τραπέζι για να του δώσετε αριθμό και χωρητικότητα (10, 11 ή 12). Πάνω από κάθε τραπέζι βλέπετε «άτομα/χωρητικότητα».
   </p>
   <div id="planSvgWrap"></div>
   <div class="legend">
-    <span><i class="dot" style="background:#7dd3ec;border-color:#1f7f9e"></i> Νυφικό τραπέζι (Νο 1)</span>
     <span><i class="dot" style="background:#eef0eb;border-color:#c8c2b4"></i> Χωρίς αριθμό</span>
     <span><i class="dot" style="background:#cdeae5;border-color:#3f9089"></i> Διαθέσιμες θέσεις</span>
     <span><i class="dot" style="background:#ffe2a6;border-color:#c98a1f"></i> Στο όριο χωρητικότητας</span>
@@ -142,6 +143,7 @@
 
 </main>
 
+<!-- DIALOG ΓΙΑ ΕΠΕΞΕΡΓΑΣΙΑ ΚΑΛΕΣΜΕΝΟΥ -->
 <dialog id="editGuestDialog">
   <div class="box">
     <h3 style="margin-bottom:15px; color:var(--accent-dark);">Επεξεργασία Καλεσμένου</h3>
@@ -159,6 +161,7 @@
   </div>
 </dialog>
 
+<!-- DIALOG ΓΙΑ ΚΑΤΟΨΗ -->
 <dialog id="numDialog">
   <div class="box">
     <h3 id="dialogTitle">Στοιχεία τραπεζιού</h3>
@@ -274,7 +277,7 @@ async function saveSeating(){
 
 function greekCollate(a,b){ return a.localeCompare(b,'el'); }
 
-// Helpers για υπολογισμό ατόμων (Ενήλικες + Παιδιά)
+// Helpers για υπολογισμό ατόμων
 function getAdults(g) { return g.adults !== undefined ? g.adults : (g.people || 0); }
 function getChildren(g) { return g.children || 0; }
 
@@ -362,7 +365,6 @@ function createGroupDOM(tableNum, tableGuests, container, isRealTable) {
 
 // ---------- ΔΙΑΔΡΑΣΤΙΚΕΣ ΛΕΙΤΟΥΡΓΙΕΣ ΚΟΥΜΠΙΩΝ ----------
 
-// Επεξεργασία Καλεσμένου (Άνοιγμα Dialog)
 window.editGuestPrompt = (id) => {
   const g = guests.find(x => x.id === id);
   if(!g) return;
@@ -375,7 +377,6 @@ window.editGuestPrompt = (id) => {
   document.getElementById('editGuestDialog').showModal();
 };
 
-// Αποθήκευση αλλαγών Καλεσμένου
 document.getElementById('btnSaveEditGuest').onclick = async () => {
   if(!currentEditGuestId) return;
   const g = guests.find(x => x.id === currentEditGuestId);
@@ -385,7 +386,6 @@ document.getElementById('btnSaveEditGuest').onclick = async () => {
     g.adults = parseInt(document.getElementById('editAdults').value) || 0;
     g.children = parseInt(document.getElementById('editChildren').value) || 0;
     g.stroller = parseInt(document.getElementById('editStroller').value) || 0;
-    // Επειδή καταργήσαμε το παλιό 'people', το διαγράφουμε (αν υπάρχει) για καθαριότητα
     delete g.people; 
     
     await saveGuests();
@@ -489,8 +489,10 @@ function exportExcel(){
 }
 
 // ---------- ΚΑΤΟΨΗ ----------
-const BRIDAL_COORDS = [[150.8,79.3],[201.5,79.5],[249.4,79.4],[513.6,78.5],[562.3,79.7],[611.7,80.1]];
 const NORMAL_COORDS = [
+  // Οι 7 θέσεις του πρώην νυφικού
+  [150.8,79.3],[201.5,79.5],[249.4,79.4],[385,80],[513.6,78.5],[562.3,79.7],[611.7,80.1],
+  // Τα υπόλοιπα
   [807.4,75.9],[735.8,77.4],[766.7,109.1],[840.2,111.5],[684.9,113.3],[99.4,115.9],[44.3,118.0],[223.3,133.0],[143.1,138.2],[592.2,138.8],
   [641.3,138.5],[801.3,144.7],[863.5,150.7],[267.8,151.9],[686.1,153.8],[547.4,155.4],[80.4,159.4],[181.7,162.0],[32.6,176.8],[643.1,180.0],
   [222.1,185.0],[131.9,187.3],[593.7,188.3],[811.5,190.0],[868.7,197.2],[267.9,207.1],[547.5,205.6],[80.4,210.0],[175.1,210.3],[37.0,225.9],
@@ -498,10 +500,14 @@ const NORMAL_COORDS = [
   [548.4,262.9],[885.0,271.2],[767.3,275.4],[830.1,277.3],[641.5,277.7],[226.3,284.8],[42.6,285.8],[692.5,286.4],[596.3,291.1],[164.4,302.9],
   [109.4,307.0],[800.3,307.0],[853.5,310.4],[66.2,328.2],[267.5,329.5],[543.5,331.0]
 ];
+
 function buildSeatLayout(){
   const seats = []; let id=0;
-  BRIDAL_COORDS.forEach(([x,y])=> seats.push({id:'s'+(id++), x, y, bride:true}));
-  NORMAL_COORDS.forEach(([x,y])=> seats.push({id:'s'+(id++), x, y, bride:false}));
+  NORMAL_COORDS.forEach(([x,y])=> {
+    // Το κεντρικό τραπέζι στη θέση [385,80] θα είναι τετράγωνο
+    const isSquare = (x === 385 && y === 80);
+    seats.push({id:'s'+(id++), x, y, isSquare});
+  });
   return seats;
 }
 const SEATS = buildSeatLayout();
@@ -511,11 +517,12 @@ function buildSvg(){
   let svg = `<svg viewBox="0 0 ${PLAN_W} ${PLAN_H}" xmlns="http://www.w3.org/2000/svg">`;
   svg += `<defs><filter id="tableShadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#000" flood-opacity="0.18"/></filter><filter id="tableShadowHover" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="2.5" stdDeviation="3" flood-color="#000" flood-opacity="0.28"/></filter></defs>`;
   svg += `<rect x="4" y="4" width="${PLAN_W-8}" height="${PLAN_H-8}" rx="14" class="roomfloor"/>`;
-  svg += `<rect x="298" y="69" width="174" height="22" rx="3" fill="#29a8d8" stroke="#1f7f9e"/>`;
-  svg += `<text x="385" y="84" text-anchor="middle" style="font-size:13px;fill:#fff;font-weight:700;">ΝΥΦΙΚΟ Νο 1</text>`;
-  svg += `<path d="M120,60 L120,98 M120,60 L660,60 M120,98 L300,98 M470,98 L660,98 M660,60 L660,98" class="wall" style="opacity:.6"/>`;
+  
+  // Τοιχογραφία του Μπαρ
   svg += `<path d="M700,165 L725,200 L700,235" class="wall"/>`;
   svg += `<text x="755" y="200" style="font-size:14px;font-weight:700;fill:#3a3a3a;">BAR</text>`;
+  
+  // Κάτω μπάρα (Είσοδος κλπ)
   svg += `<line x1="20" y1="402" x2="${PLAN_W-20}" y2="402" class="wall"/>`;
   svg += `<text x="65" y="426" class="label" style="font-weight:700">ΕΙΣΟΔΟΣ</text>`;
   svg += `<text x="${PLAN_W-45}" y="426" class="label" style="font-weight:700">W.C</text>`;
@@ -528,18 +535,22 @@ function buildSvg(){
     const tableNum = assignments[seat.id] || '';
     const cap = capacities[seat.id] || 12;
     const total = tableNum ? tableTotal(tableNum) : 0;
-    const r = seat.bride ? 16 : 18;
+    const r = 18;
 
     let seatClass, numClass='seatnum', capClass='ok';
-    if(seat.bride){ seatClass='seat-bride'; } 
-    else if(!tableNum){ seatClass='seat-empty'; numClass='seatnum empty-num'; } 
+    if(!tableNum){ seatClass='seat-empty'; numClass='seatnum empty-num'; } 
     else if(total>cap){ seatClass='seat-over'; capClass='over'; } 
     else if(total===cap){ seatClass='seat-full'; capClass='full'; } 
     else { seatClass='seat-ok'; capClass='ok'; }
 
+    // Σχεδιασμός σχήματος (Τετράγωνο vs Στρογγυλό)
+    let shapeNode = seat.isSquare 
+      ? `<rect x="${seat.x - 20}" y="${seat.y - 20}" width="40" height="40" rx="6" class="seat ${seatClass}"/>`
+      : `<circle cx="${seat.x}" cy="${seat.y}" r="${r}" class="seat ${seatClass}"/>`;
+
     svg += `<g data-seat="${seat.id}" class="seatGroup" style="cursor:pointer">
-      <circle cx="${seat.x}" cy="${seat.y}" r="${r}" class="seat ${seatClass}"/>
-      <text x="${seat.x}" y="${seat.y+4.5}" class="${numClass}" style="${seat.bride?'font-size:11px;':''}">${seat.bride ? '1' : (tableNum || '?')}</text>
+      ${shapeNode}
+      <text x="${seat.x}" y="${seat.y+4.5}" class="${numClass}">${tableNum || '?'}</text>
       ${ tableNum ? `<text x="${seat.x}" y="${seat.y-r-7}" class="seatcap ${capClass}">${total}/${cap}</text>` : '' }
     </g>`;
   });
@@ -561,7 +572,6 @@ function renderPlan(){
 
 function openSeatDialog(seatId){
   const seat = SEATS.find(s=>s.id===seatId);
-  if(seat.bride){ toast('Το νυφικό τραπέζι είναι σταθερά το Νο 1'); return; }
   currentSeatId = seatId;
   const tableNum = assignments[seatId] || '';
   document.getElementById('dialogInput').value = tableNum;
